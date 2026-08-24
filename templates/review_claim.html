@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-title">Officer Review Screen</div>
+<div class="page-sub">Claim Reference: <strong class="mono">{{ claim.id }}</strong></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div>
+    <div class="card">
+      <div class="card-title">Claim Information</div>
+      <table style="width:100%;font-size:13px">
+        <tr><td style="color:#888;padding:6px 0;width:140px">Claim ID</td><td class="mono"><strong>{{ claim.id }}</strong></td></tr>
+        <tr><td style="color:#888;padding:6px 0">Patient</td><td><strong>{{ claim.patient }}</strong></td></tr>
+        <tr><td style="color:#888;padding:6px 0">Hospital</td><td>{{ claim.hospital }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Treatment</td><td>{{ claim.treatment }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Date</td><td>{{ claim.date }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Amount</td><td><strong>PKR {{ "{:,}".format(claim.amount) }}</strong></td></tr>
+        <tr><td style="color:#888;padding:6px 0">Policy</td><td class="mono">{{ claim.policy }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Status</td><td><span class="badge {{ 'b-escalated' if claim.status=='Escalated' else 'b-review' if claim.status=='Under Review' else 'b-info' if claim.status=='Info Requested' else 'b-submitted' }}">{{ claim.status }}</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Policy Coverage</div>
+      {% if policy %}
+      <table style="width:100%;font-size:13px">
+        <tr><td style="color:#888;padding:6px 0;width:140px">Holder</td><td><strong>{{ policy.holder }}</strong></td></tr>
+        <tr><td style="color:#888;padding:6px 0">Plan</td><td>{{ policy.plan }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Status</td><td><span class="badge b-approved">{{ policy.status }}</span></td></tr>
+        <tr><td style="color:#888;padding:6px 0">Limit</td><td>PKR {{ "{:,}".format(policy.limit) }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Remaining</td><td style="color:#15803d;font-weight:700">PKR {{ "{:,}".format(policy.remaining) }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Expiry</td><td>{{ policy.expiry }}</td></tr>
+        <tr><td style="color:#888;padding:6px 0">Covered</td><td>{{ policy.covered | join(", ") }}</td></tr>
+      </table>
+      {% else %}
+      <div class="alert alert-danger">Policy not found.</div>
+      {% endif %}
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-title">Fraud Risk Score</div>
+      <div style="text-align:center;padding:10px 0 16px">
+        <div class="score-num {{ 'score-high' if claim.risk=='High' else 'score-medium' if claim.risk=='Medium' else 'score-low' }}">
+          {{ claim.score }}<span style="font-size:18px;color:#888">/100</span>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-top:4px;color:{{ '#dc2626' if claim.risk=='High' else '#d97706' if claim.risk=='Medium' else '#15803d' }}">
+          {{ claim.risk }} Risk
+        </div>
+        {% if claim.risk == 'High' %}
+        <div class="alert alert-danger" style="margin-top:12px;text-align:left">Auto-escalated — senior officer review required.</div>
+        {% elif claim.risk == 'Medium' %}
+        <div class="alert alert-warn" style="margin-top:12px;text-align:left">Medium risk — review carefully before deciding.</div>
+        {% else %}
+        <div class="alert alert-success" style="margin-top:12px;text-align:left">Low risk — standard verification.</div>
+        {% endif %}
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Rule ID</th><th>Rule</th><th>Max Score</th></tr></thead>
+        <tbody>
+          {% for r in rules %}
+          <tr><td class="mono">{{ r.id }}</td><td style="font-size:12px">{{ r.name }}</td><td><strong>{{ r.weight }}</strong></td></tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Make a Decision</div>
+      {% if claim.officer_note %}
+      <div class="alert alert-info"><strong>Previous Note:</strong> {{ claim.officer_note }}</div>
+      {% endif %}
+      <form method="POST">
+        <div class="form-group">
+          <label>Officer Notes / Reason *</label>
+          <textarea name="note" placeholder="Provide reason for your decision (mandatory)" required></textarea>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="submit" name="action" value="approve" class="btn btn-green">Approve</button>
+          <button type="submit" name="action" value="reject"  class="btn btn-red">Reject</button>
+          <button type="submit" name="action" value="info"    class="btn btn-amber">Request Info</button>
+          <a href="{{ url_for('review_queue') }}" class="btn btn-outline">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
