@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-title">Reports & Analytics</div>
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-label">Total Claims</div><div class="stat-val">{{ stats.total }}</div></div>
+  <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-val" style="color:#15803d">{{ stats.approved }}</div></div>
+  <div class="stat-card"><div class="stat-label">Rejected</div><div class="stat-val" style="color:#dc2626">{{ stats.rejected }}</div></div>
+  <div class="stat-card"><div class="stat-label">High Risk</div><div class="stat-val" style="color:#dc2626">{{ stats.high_risk }}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="card-title">Risk Distribution</div>
+    <table style="width:100%;font-size:13px">
+      <tr style="border-bottom:1px solid #f0f4f8"><td style="padding:10px 0;color:#888">High Risk</td><td><span class="r-high">{{ stats.high_risk }}</span></td><td style="color:#888;font-size:12px">{{ ((stats.high_risk / stats.total) * 100)|round(1) if stats.total else 0 }}%</td></tr>
+      <tr style="border-bottom:1px solid #f0f4f8"><td style="padding:10px 0;color:#888">Medium Risk</td><td><span class="r-medium">{{ stats.medium }}</span></td><td style="color:#888;font-size:12px">{{ ((stats.medium / stats.total) * 100)|round(1) if stats.total else 0 }}%</td></tr>
+      <tr><td style="padding:10px 0;color:#888">Low Risk</td><td><span class="r-low">{{ stats.low }}</span></td><td style="color:#888;font-size:12px">{{ ((stats.low / stats.total) * 100)|round(1) if stats.total else 0 }}%</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Fraud Rules Reference</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Rule</th><th>Description</th><th>Weight</th></tr></thead>
+      <tbody>
+        {% for r in rules %}
+        <tr><td class="mono">{{ r.id }}</td><td style="font-size:12px">{{ r.name }}</td><td><strong>{{ r.weight }}</strong></td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">All Claims</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Claim ID</th><th>Patient</th><th>Hospital</th><th>Treatment</th><th>Amount (PKR)</th><th>Score</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for c in claims %}
+    <tr>
+      <td class="mono">{{ c.id }}</td>
+      <td>{{ c.patient }}</td>
+      <td>{{ c.hospital }}</td>
+      <td>{{ c.treatment }}</td>
+      <td>{{ "{:,}".format(c.amount) }}</td>
+      <td><span class="{{ 'r-high' if c.risk=='High' else 'r-medium' if c.risk=='Medium' else 'r-low' }}">{{ c.score }}/100</span></td>
+      <td><span class="badge {{ 'b-approved' if c.status=='Approved' else 'b-rejected' if c.status=='Rejected' else 'b-escalated' if c.status=='Escalated' else 'b-info' if c.status=='Info Requested' else 'b-review' }}">{{ c.status }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}
