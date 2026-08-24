@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-title">Audit Trail</div>
+<div class="page-sub">Immutable record of all system actions</div>
+<div class="card">
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Claim Reference</th></tr></thead>
+    <tbody>
+    {% for log in logs %}
+    <tr>
+      <td class="mono" style="font-size:12px">{{ log.time }}</td>
+      <td><strong>{{ log.user }}</strong></td>
+      <td>{{ log.action }}</td>
+      <td class="mono" style="color:#1a56db">{{ log.claim }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}
