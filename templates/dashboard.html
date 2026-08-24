@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+{% if role == 'hospital' %}
+<div class="page-title">Hospital Dashboard</div>
+<div class="page-sub">Welcome, {{ session.name }}</div>
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-label">Total Claims</div><div class="stat-val">{{ stats.total }}</div></div>
+  <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val">{{ stats.pending }}</div></div>
+  <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-val" style="color:#15803d">{{ stats.approved }}</div></div>
+  <div class="stat-card"><div class="stat-label">Rejected</div><div class="stat-val" style="color:#dc2626">{{ stats.rejected }}</div></div>
+</div>
+<div class="card">
+  <div class="card-title">Recent Claims</div>
+  <div style="margin-bottom:12px"><a href="{{ url_for('submit_claim') }}" class="btn btn-primary">+ Submit New Claim</a></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Claim ID</th><th>Patient</th><th>Treatment</th><th>Amount (PKR)</th><th>Fraud Score</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for c in claims %}
+    <tr>
+      <td class="mono">{{ c.id }}</td>
+      <td><strong>{{ c.patient }}</strong></td>
+      <td>{{ c.treatment }}</td>
+      <td>{{ "{:,}".format(c.amount) }}</td>
+      <td><span class="{{ 'r-high' if c.risk=='High' else 'r-medium' if c.risk=='Medium' else 'r-low' }}">{{ c.score }}/100 {{ c.risk }}</span></td>
+      <td><span class="badge {{ 'b-approved' if c.status=='Approved' else 'b-rejected' if c.status=='Rejected' else 'b-escalated' if c.status=='Escalated' else 'b-info' if c.status=='Info Requested' else 'b-review' if c.status=='Under Review' else 'b-submitted' }}">{{ c.status }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% elif role == 'officer' or role == 'admin' %}
+<div class="page-title">{% if role == 'admin' %}Admin{% else %}Officer{% endif %} Dashboard</div>
+<div class="page-sub">Welcome, {{ session.name }}</div>
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-val">{{ stats.pending }}</div></div>
+  <div class="stat-card"><div class="stat-label">High Risk</div><div class="stat-val" style="color:#dc2626">{{ stats.high_risk }}</div></div>
+  <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-val" style="color:#15803d">{{ stats.approved }}</div></div>
+  <div class="stat-card"><div class="stat-label">Rejected</div><div class="stat-val" style="color:#dc2626">{{ stats.rejected }}</div></div>
+</div>
+<div class="card">
+  <div class="card-title">Claims Awaiting Review</div>
+  <div style="margin-bottom:12px"><a href="{{ url_for('review_queue') }}" class="btn btn-primary">Open Review Queue</a></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Claim ID</th><th>Patient</th><th>Treatment</th><th>Amount (PKR)</th><th>Fraud Score</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for c in claims if c.status in ['Submitted','Under Review','Escalated','Info Requested'] %}
+    <tr>
+      <td class="mono">{{ c.id }}</td>
+      <td><strong>{{ c.patient }}</strong></td>
+      <td>{{ c.treatment }}</td>
+      <td>{{ "{:,}".format(c.amount) }}</td>
+      <td><span class="{{ 'r-high' if c.risk=='High' else 'r-medium' if c.risk=='Medium' else 'r-low' }}">{{ c.score }}/100</span></td>
+      <td><span class="badge {{ 'b-escalated' if c.status=='Escalated' else 'b-review' if c.status=='Under Review' else 'b-info' if c.status=='Info Requested' else 'b-submitted' }}">{{ c.status }}</span></td>
+      <td><a href="{{ url_for('review_claim', claim_id=c.id) }}" class="btn btn-sm btn-primary">Review</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% elif role == 'policyholder' %}
+<div class="page-title">Policyholder Dashboard</div>
+<div class="page-sub">Welcome, {{ session.name }}</div>
+<div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+  <div class="stat-card"><div class="stat-label">Total Claims</div><div class="stat-val">{{ stats.total }}</div></div>
+  <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-val" style="color:#15803d">{{ stats.approved }}</div></div>
+  <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val" style="color:#d97706">{{ stats.pending }}</div></div>
+</div>
+<div class="card">
+  <div class="card-title">My Claims</div>
+  <div style="margin-bottom:12px"><a href="{{ url_for('track_claims') }}" class="btn btn-primary">View Full Tracking</a></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Claim ID</th><th>Treatment</th><th>Amount (PKR)</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for c in claims %}
+    <tr>
+      <td class="mono">{{ c.id }}</td>
+      <td>{{ c.treatment }}</td>
+      <td>{{ "{:,}".format(c.amount) }}</td>
+      <td><span class="badge {{ 'b-approved' if c.status=='Approved' else 'b-rejected' if c.status=='Rejected' else 'b-info' if c.status=='Info Requested' else 'b-review' }}">{{ c.status }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endif %}
+{% endblock %}
