@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HealthShield</title>
+<style>
+:root {
+  --primary:   #1a3a5c;
+  --accent:    #1a56db;
+  --bg:        #f4f6f8;
+  --card-bg:   #ffffff;
+  --border:    #dde3ec;
+  --text:      #222222;
+  --muted:     #666666;
+  --success:   #15803d;
+  --danger:    #dc2626;
+  --warn:      #d97706;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Arial, sans-serif; background: var(--bg); color:var(--text); font-size:14px; }
+a { color:var(--accent); text-decoration:none; }
+.navbar { background:var(--primary); color:#fff; padding:0 24px; display:flex; align-items:center; height:52px; gap:20px; }
+.navbar-brand { font-size:18px; font-weight:700; color:#fff; margin-right:16px; }
+.navbar-brand span { color:#5bc4f5; }
+.navbar-links { display:flex; gap:4px; flex:1; }
+.navbar-links a { color:rgba(255,255,255,0.78); padding:6px 13px; border-radius:4px; font-size:13px; }
+.navbar-links a:hover, .navbar-links a.active { background:rgba(255,255,255,0.12); color:#fff; }
+.navbar-right { display:flex; align-items:center; gap:10px; }
+.user-pill { background:rgba(255,255,255,0.12); padding:4px 12px; border-radius:20px; font-size:12px; color:#fff; }
+.logout-btn { background:#c0392b; color:#fff; border:none; padding:5px 12px; border-radius:4px; cursor:pointer; font-size:13px; font-family:Arial; }
+.container { max-width:1100px; margin:24px auto; padding:0 20px; }
+.page-title { font-size:20px; font-weight:700; margin-bottom:4px; }
+.page-sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+.card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:20px; }
+.card-title { font-size:15px; font-weight:700; margin-bottom:14px; color:var(--primary); border-bottom:2px solid #e8edf3; padding-bottom:8px; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+.stat-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:16px; }
+.stat-label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+.stat-val { font-size:26px; font-weight:700; color:var(--primary); }
+.stat-sub { font-size:11px; color:#888; margin-top:4px; }
+.tbl-wrap { overflow-x:auto; border-radius:6px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; background:#fff; }
+thead th { background:#f0f4f8; padding:10px 14px; text-align:left; font-size:12px; font-weight:700; color:#555; border-bottom:1px solid var(--border); }
+tbody tr { border-bottom:1px solid #f0f4f8; }
+tbody tr:hover { background:#fafbff; }
+tbody td { padding:11px 14px; font-size:13px; }
+.badge { display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+.b-submitted { background:#dbeafe; color:#1e40af; }
+.b-review    { background:#fef3c7; color:#92400e; }
+.b-approved  { background:#d1fae5; color:#065f46; }
+.b-rejected  { background:#fee2e2; color:#991b1b; }
+.b-escalated { background:#ede9fe; color:#5b21b6; }
+.b-info      { background:#fff3cd; color:#856404; }
+.r-high   { background:#fee2e2; color:#991b1b; display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+.r-medium { background:#fef3c7; color:#92400e; display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+.r-low    { background:#d1fae5; color:#065f46; display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; font-size:12px; font-weight:700; color:#444; margin-bottom:5px; text-transform:uppercase; }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:9px 12px; border:1.5px solid #ccc; border-radius:5px; font-size:13px; font-family:Arial; outline:none; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--accent); }
+.form-group textarea { resize:vertical; min-height:80px; }
+.btn { display:inline-block; padding:8px 18px; border-radius:5px; font-size:13px; font-weight:700; cursor:pointer; border:none; font-family:Arial; text-decoration:none; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { opacity:.88; }
+.btn-green   { background:var(--success); color:#fff; }
+.btn-red     { background:var(--danger);  color:#fff; }
+.btn-amber   { background:var(--warn);    color:#fff; }
+.btn-outline { background:#fff; color:#333; border:1.5px solid #ccc; }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.alert { padding:12px 16px; border-radius:6px; margin-bottom:16px; font-size:13px; }
+.alert-success { background:#d1fae5; border:1px solid #6ee7b7; color:#065f46; }
+.alert-danger  { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; }
+.alert-warn    { background:#fef3c7; border:1px solid #fcd34d; color:#92400e; }
+.alert-info    { background:#dbeafe; border:1px solid #93c5fd; color:#1e40af; }
+.score-num { font-size:36px; font-weight:700; }
+.score-high   { color:var(--danger); }
+.score-medium { color:var(--warn); }
+.score-low    { color:var(--success); }
+.mono { font-family:'Courier New',monospace; font-size:12px; }
+hr { border:none; border-top:1px solid #e5e7eb; margin:14px 0; }
+</style>
+</head>
+<body>
+{% if session.user %}
+<nav class="navbar">
+  <div class="navbar-brand">Health<span>Shield</span></div>
+  <div class="navbar-links">
+    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+    {% if session.role == 'hospital' %}
+    <a href="{{ url_for('submit_claim') }}" class="{% if request.endpoint == 'submit_claim' %}active{% endif %}">Submit Claim</a>
+    {% endif %}
+    {% if session.role in ['officer', 'admin'] %}
+    <a href="{{ url_for('review_queue') }}" class="{% if request.endpoint == 'review_queue' %}active{% endif %}">Review Queue</a>
+    <a href="{{ url_for('reports') }}"      class="{% if request.endpoint == 'reports' %}active{% endif %}">Reports</a>
+    <a href="{{ url_for('audit_log') }}"    class="{% if request.endpoint == 'audit_log' %}active{% endif %}">Audit Log</a>
+    {% endif %}
+    {% if session.role == 'policyholder' %}
+    <a href="{{ url_for('track_claims') }}" class="{% if request.endpoint == 'track_claims' %}active{% endif %}">Track Claims</a>
+    {% endif %}
+    <a href="{{ url_for('notifications') }}" class="{% if request.endpoint == 'notifications' %}active{% endif %}">
+      Alerts {% if unread > 0 %}<span style="background:#dc2626;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px;">{{ unread }}</span>{% endif %}
+    </a>
+  </div>
+  <div class="navbar-right">
+    <span class="user-pill">{{ session.name }} ({{ session.role|capitalize }})</span>
+    <a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a>
+  </div>
+</nav>
+{% endif %}
+<div class="container">
+  {% with msgs = get_flashed_messages() %}
+    {% for msg in msgs %}<div class="alert alert-success">{{ msg }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>
