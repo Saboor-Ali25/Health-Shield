@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-title">Claim Tracking</div>
+<div class="page-sub">Real-time status of your insurance claims — {{ session.name }}</div>
+{% if policy %}
+<div class="card">
+  <div class="card-title">My Policy</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+    <div><div style="font-size:11px;color:#888;text-transform:uppercase">Policy</div><div style="font-weight:700;font-family:monospace;margin-top:4px">{{ policy.number }}</div></div>
+    <div><div style="font-size:11px;color:#888;text-transform:uppercase">Plan</div><div style="font-weight:700;margin-top:4px">{{ policy.plan }}</div></div>
+    <div><div style="font-size:11px;color:#888;text-transform:uppercase">Status</div><div style="margin-top:4px"><span class="badge b-approved">{{ policy.status }}</span></div></div>
+    <div><div style="font-size:11px;color:#888;text-transform:uppercase">Remaining</div><div style="font-weight:700;color:#15803d;margin-top:4px">PKR {{ "{:,}".format(policy.remaining) }}</div></div>
+  </div>
+</div>
+{% endif %}
+{% if not claims %}
+<div class="alert alert-info">No claims found for your policy.</div>
+{% else %}
+{% for c in claims %}
+<div class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+    <div>
+      <span class="mono" style="font-size:14px;font-weight:700">{{ c.id }}</span>
+      <span style="color:#888;font-size:13px;margin-left:12px">{{ c.treatment }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span>PKR <strong>{{ "{:,}".format(c.amount) }}</strong></span>
+      <span class="badge {{ 'b-approved' if c.status=='Approved' else 'b-rejected' if c.status=='Rejected' else 'b-info' if c.status=='Info Requested' else 'b-review' if c.status=='Under Review' else 'b-escalated' if c.status=='Escalated' else 'b-submitted' }}">{{ c.status }}</span>
+    </div>
+  </div>
+  <div style="position:relative;padding-left:28px;border-left:2px solid #dde3ec;margin-left:10px">
+    <div style="position:relative;margin-bottom:16px">
+      <div style="position:absolute;left:-37px;top:2px;width:14px;height:14px;border-radius:50%;background:#1a3a5c;border:2px solid #fff;box-shadow:0 0 0 2px #1a3a5c"></div>
+      <div style="font-size:11px;color:#888;font-family:monospace">{{ c.date }}</div>
+      <div style="font-size:13px;font-weight:700">Claim Submitted</div>
+      <div style="font-size:12px;color:#666">By {{ c.hospital }}</div>
+    </div>
+    <div style="position:relative;margin-bottom:16px">
+      <div style="position:absolute;left:-37px;top:2px;width:14px;height:14px;border-radius:50%;background:{{ '#dc2626' if c.risk=='High' else '#d97706' if c.risk=='Medium' else '#15803d' }};border:2px solid #fff;box-shadow:0 0 0 2px {{ '#dc2626' if c.risk=='High' else '#d97706' if c.risk=='Medium' else '#15803d' }}"></div>
+      <div style="font-size:11px;color:#888;font-family:monospace">Auto-Scored</div>
+      <div style="font-size:13px;font-weight:700">Fraud Risk Scored</div>
+      <div style="font-size:12px;color:#666">Score: <strong>{{ c.score }}/100</strong> — <span class="{{ 'r-high' if c.risk=='High' else 'r-medium' if c.risk=='Medium' else 'r-low' }}">{{ c.risk }}</span></div>
+    </div>
+    {% if c.status not in ['Submitted'] %}
+    <div style="position:relative;margin-bottom:16px">
+      <div style="position:absolute;left:-37px;top:2px;width:14px;height:14px;border-radius:50%;background:#1a56db;border:2px solid #fff;box-shadow:0 0 0 2px #1a56db"></div>
+      <div style="font-size:11px;color:#888;font-family:monospace">Processing</div>
+      <div style="font-size:13px;font-weight:700">Under Officer Review</div>
+    </div>
+    {% endif %}
+    {% if c.status == 'Info Requested' %}
+    <div style="position:relative;margin-bottom:16px">
+      <div style="position:absolute;left:-37px;top:2px;width:14px;height:14px;border-radius:50%;background:#d97706;border:2px solid #fff;box-shadow:0 0 0 2px #d97706"></div>
+      <div style="font-size:11px;color:#888;font-family:monospace">Action Required</div>
+      <div style="font-size:13px;font-weight:700;color:#d97706">Additional Information Requested</div>
+      {% if c.officer_note %}<div style="font-size:12px;color:#666">{{ c.officer_note }}</div>{% endif %}
+    </div>
+    {% endif %}
+    {% if c.status in ['Approved','Rejected'] %}
+    <div style="position:relative">
+      <div style="position:absolute;left:-37px;top:2px;width:14px;height:14px;border-radius:50%;background:{{ '#15803d' if c.status=='Approved' else '#dc2626' }};border:2px solid #fff;box-shadow:0 0 0 2px {{ '#15803d' if c.status=='Approved' else '#dc2626' }}"></div>
+      <div style="font-size:11px;color:#888;font-family:monospace">Final Decision</div>
+      <div style="font-size:13px;font-weight:700;color:{{ '#15803d' if c.status=='Approved' else '#dc2626' }}">Claim {{ c.status }}</div>
+      {% if c.officer_note %}<div style="font-size:12px;color:#666">{{ c.officer_note }}</div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}
