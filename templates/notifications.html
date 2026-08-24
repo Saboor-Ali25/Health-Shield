@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-title">Notifications & Alerts</div>
+<div class="card">
+  {% if not notifications %}
+  <div class="alert alert-info">No notifications.</div>
+  {% else %}
+  {% for n in notifications %}
+  <div style="padding:12px 14px;border-radius:6px;margin-bottom:8px;border:1px solid #dde3ec;background:{{ '#eff6ff' if not n.read else '#fff' }}">
+    <div style="font-size:13px;{{ 'font-weight:700' if not n.read else '' }}">{{ n.msg }}</div>
+    {% if not n.read %}<span style="font-size:10px;background:#1a56db;color:#fff;padding:1px 6px;border-radius:10px;margin-top:4px;display:inline-block">NEW</span>{% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
