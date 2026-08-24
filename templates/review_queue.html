@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-title">Claim Review Queue</div>
+<div class="page-sub">{{ claims|length }} claims awaiting review — sorted by fraud risk score</div>
+{% if not claims %}
+<div class="alert alert-info">No claims currently awaiting review.</div>
+{% else %}
+<div class="card">
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Claim ID</th><th>Patient</th><th>Hospital</th><th>Treatment</th><th>Amount (PKR)</th><th>Fraud Score</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for c in claims %}
+    <tr {% if c.risk == 'High' %}style="background:#fff5f5"{% endif %}>
+      <td class="mono">{{ c.id }}</td>
+      <td><strong>{{ c.patient }}</strong></td>
+      <td>{{ c.hospital }}</td>
+      <td>{{ c.treatment }}</td>
+      <td>{{ "{:,}".format(c.amount) }}</td>
+      <td><span class="{{ 'r-high' if c.risk=='High' else 'r-medium' if c.risk=='Medium' else 'r-low' }}">{{ c.score }}/100 {{ c.risk }}</span></td>
+      <td><span class="badge {{ 'b-escalated' if c.status=='Escalated' else 'b-review' if c.status=='Under Review' else 'b-info' if c.status=='Info Requested' else 'b-submitted' }}">{{ c.status }}</span></td>
+      <td><a href="{{ url_for('review_claim', claim_id=c.id) }}" class="btn btn-sm btn-primary">Review</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endif %}
+{% endblock %}
